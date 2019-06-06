@@ -1,0 +1,97 @@
+version: "3.1"
+
+services:
+  app:
+    image: index.docker.io/gentrackio/gateway:PROD
+    hostname: app1
+    container_name: gateway_app
+    volumes:
+      - GatewayConfig:/app/config:ro
+      - GatewayData:/data:rw
+    ports:
+      - 443:3000
+    expose:
+      - 3000
+    environment:
+      - MESSAGE_QUEUE=amqp://rabbitmq:rabbitmq@mq
+      - MESSAGE_STORE=redis://redis:6379
+      - VAULT_ADDR=https://vault:8200
+      # This line is required if using a self signed certificate
+      - VAULT_SKIP_VERIFY=true
+      - NODE_ENV=production
+    secrets:
+      - key
+    depends_on:
+      - mq
+      - vault
+      - redis
+  mq:
+    image: rabbitmq:3-management
+    hostname: rabbit1
+    container_name: gateway_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbitmq
+      RABBITMQ_DEFAULT_PASS: rabbitmq
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - 15672:15672
+    expose:
+      - 5672
+    labels:
+      NAME: rabbitmq1
+    volumes:
+      - RabbitMQData:/var/lib/rabbitmq/mnesia
+  vault:
+    image: vault:0.8.0
+    container_name: gateway_vault
+    expose:
+      - 8200
+    volumes:
+      - VaultData:/data
+    cap_add:
+      - IPC_LOCK
+    entrypoint: vault server -config=/data/config/
+  redis:
+    image: redis:4-alpine
+    hostname: redis1
+    container_name: gateway_redis
+    expose:
+      - 6379
+    volumes:
+      - RedisData:/data:rw
+  watchtower:
+    image: v2tec/watchtower
+    container_name: gateway_watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.docker/config.json:/config.json
+  # sumologic:
+  #   image: sumologic/collector:latest
+  #   container_name: gateway_sumologic
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   environment:
+  #     - SUMO_ACCESS_ID=[insert API key here]
+  #     - SUMO_ACCESS_KEY=[insert API key here]
+  #     - SUMO_COLLECTOR_NAME=[insert name here]
+  # datadog:
+  #   image: datadog/docker-dd-agent:latest
+  #   container_name: gateway_datadog
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - /proc/:/host/proc/
+  #     - /sys/fs/cgroup/:/host/sys/fs/cgroup
+  #     - ~/platform/http_check.yaml:/conf.d/http_check.yaml
+  #   environment:
+  #     - API_KEY=[insert API key here]
+  #     - SD_BACKEND=docker
+  #     - DD_HOSTNAME=[insert name here]
+volumes:
+  GatewayData:
+  GatewayConfig:
+  RedisData:
+  RabbitMQData:
+  VaultData:
+secrets:
+  key:
+    file: key.txt
