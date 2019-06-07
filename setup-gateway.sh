@@ -134,20 +134,28 @@ if [ ! -d $SYSTEMD_PATH ]; then
 	su - $GATEWAY_USER -c "docker-compose -f $DOCKER_COMPOSE up -d" && echo "Success"
 
 else
+# docker.service override
+/bin/mkdir -p /etc/systemd/system/docker.service.d/
+DOCKER_SERVICE_OVERRIDE='/etc/systemd/system/docker.service.d/override.conf' &&
+cat > $DOCKER_SERVICE_OVERRIDE  << EOL
+[Unit]
+Before=gentrack-gateway-docker.service
+Requires=gentrack-gateway-docker.service
+EOL
+systemctl daemon-reload && echo "systemctl daemon reloaded" &&
+# gateway docker service
 GATEWAY_DOCKER_SERVICE='/etc/systemd/system/gentrack-gateway-docker.service' &&
 cat > $GATEWAY_DOCKER_SERVICE  << EOL
 [Unit]
 Description=Gentrack Data Gateway
 After=docker.service
 Requires=docker.service
-StartLimitBurst=3
-StartLimitInterval=60s
 
 [Service]
 Type=simple
 User=gatewayuser
 Group=docker
-Restart=on-failure
+Restart=always
 ExecStart=/usr/local/bin/docker-compose -f $INSTALL_DIR/docker-compose.yml up
 ExecStop=/usr/local/bin/docker-compose -f $INSTALL_DIR/docker-compose.yml down
 
@@ -158,4 +166,3 @@ systemctl enable gentrack-gateway-docker && echo "gentrack-gateway-docker.servic
 systemctl start gentrack-gateway-docker && echo "gentrack-gateway-docker.service started"
 fi
 ) || die "Failed at configuring gentrack-gateway-docker.service"
-
