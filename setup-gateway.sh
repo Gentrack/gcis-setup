@@ -148,8 +148,8 @@ GATEWAY_DOCKER_SERVICE='/etc/systemd/system/gentrack-gateway-docker.service' &&
 cat > $GATEWAY_DOCKER_SERVICE  << EOL
 [Unit]
 Description=Gentrack Data Gateway
-After=docker.service
-Requires=docker.service
+After=docker.service proc-sys-fs-binfmt_misc.mount proc-sys-fs-binfmt_misc.automount
+Requires=docker.service proc-sys-fs-binfmt_misc.mount proc-sys-fs-binfmt_misc.automount
 
 [Service]
 Type=simple
