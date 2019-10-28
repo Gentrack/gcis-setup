@@ -52,19 +52,20 @@ grep -E "^(\s|\t)*- MESSAGE_QUEUE=.*$" $DOCKER_COMPOSE_SRC >/dev/null || die "Co
 	docker volume prune -f >/dev/null 2>&1
 ) || die "Failed to clean up dockers"
 
+GATEWAY_APP_IMAGE=$(grep -E "^(\s|\t)*image: index.docker.io/gentrackio/gateway:PROD$" $DOCKER_COMPOSE_SRC)
+if [[ ! -z ${GATEWAY_APP_IMAGE} ]]; then
+	if [ "$PLATFORM_URL" == "https://api-uk.integration.gentrack.cloud" ]; then
+		GATEWAY_APP_IMAGE_UPDATED="${GATEWAY_APP_IMAGE}-UK"
+	elif [ "$PLATFORM_URL" == "https://api-au.integration.gentrack.cloud" ]; then
+		GATEWAY_APP_IMAGE_UPDATED="${GATEWAY_APP_IMAGE}-AU"
+	fi
+fi
+
 (
 	rm -rf $INSTALL_DIR &&
 		mkdir -p $INSTALL_DIR &&
-		tr -d "\r" <$DOCKER_COMPOSE_SRC >$DOCKER_COMPOSE &&
-		GATEWAY_APP_IMAGE=$(grep -E "^(\s|\t)*image: index.docker.io/gentrackio/gateway:PROD$" $DOCKER_COMPOSE)
-	if [[ ! -z ${GATEWAY_APP_IMAGE} ]]; then
-		if [ "$PLATFORM_URL" == "https://api-uk.integration.gentrack.cloud" ]; then
-			GATEWAY_APP_IMAGE_UPDATED="${GATEWAY_APP_IMAGE}-UK"
-		elif [ "$PLATFORM_URL" == "https://api-au.integration.gentrack.cloud" ]; then
-			GATEWAY_APP_IMAGE_UPDATED="${GATEWAY_APP_IMAGE}-AU"
-		fi
-	fi
-	([[ -z $GATEWAY_APP_IMAGE_UPDATED ]] || sed -i "s/${GATEWAY_APP_IMAGE//\//\\/}$/${GATEWAY_APP_IMAGE_UPDATED//\//\\/}/g" $DOCKER_COMPOSE) &&
+		cp $DOCKER_COMPOSE_SRC $DOCKER_COMPOSE &&
+		([[ -z $GATEWAY_APP_IMAGE_UPDATED ]] || sed -i "s/${GATEWAY_APP_IMAGE//\//\\/}$/${GATEWAY_APP_IMAGE_UPDATED//\//\\/}/g" $DOCKER_COMPOSE) &&
 		sed -i "s/- MESSAGE_QUEUE=.*\$/- MESSAGE_QUEUE=amqp:\/\/$MESSAGE_QUEUE_URL/g" $DOCKER_COMPOSE &&
 		sed -i "s/RABBITMQ_DEFAULT_USER:.*\$/RABBITMQ_DEFAULT_USER: $RABBITMQ_DEFAULT_USER/g" $DOCKER_COMPOSE &&
 		sed -i "s/RABBITMQ_DEFAULT_PASS:.*\$/RABBITMQ_DEFAULT_PASS: $RABBITMQ_DEFAULT_PASS/g" $DOCKER_COMPOSE &&
@@ -160,8 +161,6 @@ EOL
 			cat >$GATEWAY_DOCKER_SERVICE <<EOL
 [Unit]
 Description=Gentrack Data Gateway
-# proc-sys-fs-binfmt_misc.mount and proc-sys-fs-binfmt_misc.automount are required by the Datadog docker container to collect system logs.
-# If Datadog is not enabled or the above services are not installed, then remove them in the 'After' and 'Requires' units.
 After=docker.service proc-sys-fs-binfmt_misc.mount proc-sys-fs-binfmt_misc.automount
 Requires=docker.service proc-sys-fs-binfmt_misc.mount proc-sys-fs-binfmt_misc.automount
 

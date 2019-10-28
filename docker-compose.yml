@@ -2,6 +2,7 @@ version: "3.1"
 
 services:
   app:
+    # Use region specific image tag: PROD-AU or PROD-UK
     image: index.docker.io/gentrackio/gateway:PROD
     hostname: app1
     container_name: gateway_app
@@ -16,8 +17,16 @@ services:
       - MESSAGE_QUEUE=amqp://rabbitmq:rabbitmq@mq
       - MESSAGE_STORE=redis://redis:6379
       - VAULT_ADDR=https://vault:8200
-      # This line is required if using a self signed certificate
+      # This line is required if using a self signed certificate in vault (the value of true or false doesn't matter)
       - VAULT_SKIP_VERIFY=true
+      # This line is required if using a self signed certificate in Core systems
+      # - NODE_TLS_REJECT_UNAUTHORIZED=0
+      # Override minimal TLS version. Allowed values are 'TLSv1.1' or 'TLSv1'.
+      # The default minimal version is TLSv1.2.
+      # - TLS_MIN_VERSION=
+      # Override default TLS ciphers with a colon-delimited list of cipher suites or cipher families
+      # e.g., "HIGH:!ADH:!AECDH:!kDH:!kECDH:!PSK:!SRP"
+      # - TLS_CIPHERS=
       - NODE_ENV=production
     secrets:
       - key
