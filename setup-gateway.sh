@@ -160,6 +160,8 @@ EOL
 			cat >$GATEWAY_DOCKER_SERVICE <<EOL
 [Unit]
 Description=Gentrack Data Gateway
+# proc-sys-fs-binfmt_misc.mount and proc-sys-fs-binfmt_misc.automount are required by the Datadog docker container to collect system logs.
+# If Datadog is not enabled or the above services are not installed, then remove them in the 'After' and 'Requires' units.
 After=docker.service proc-sys-fs-binfmt_misc.mount proc-sys-fs-binfmt_misc.automount
 Requires=docker.service proc-sys-fs-binfmt_misc.mount proc-sys-fs-binfmt_misc.automount
 
