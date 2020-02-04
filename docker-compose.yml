@@ -84,7 +84,7 @@ services:
   #     - SUMO_ACCESS_KEY=[insert API key here]
   #     - SUMO_COLLECTOR_NAME=[insert name here]
   # datadog:
-  #   image: datadog/docker-dd-agent:latest
+  #   image: datadog/agent:7
   #   container_name: gateway_datadog
   #   volumes:
   #     - /var/run/docker.sock:/var/run/docker.sock
@@ -92,8 +92,8 @@ services:
   #     - /sys/fs/cgroup/:/host/sys/fs/cgroup
   #     - ~/platform/http_check.yaml:/conf.d/http_check.yaml
   #   environment:
-  #     - API_KEY=[insert API key here]
-  #     - SD_BACKEND=docker
+  #     - DD_API_KEY=[insert API key here]
+  #     - DD_SITE=datadoghq.eu
   #     - DD_HOSTNAME=[insert name here]
 volumes:
   GatewayData:
