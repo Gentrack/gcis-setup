@@ -83,7 +83,7 @@ services:
   #   environment:
   #     - SUMO_ACCESS_ID=[insert API ID here]
   #     - SUMO_ACCESS_KEY=[insert API key here]
-  #     - SUMO_COLLECTOR_NAME=Platform Data Gateway - [insert name here]
+  #     - SUMO_COLLECTOR_NAME=GCIS Data Gateway - [insert name here]
   #     - SUMO_COLLECTOR_NAME_PREFIX=
   #     - SUMO_SOURCES_JSON=/etc/custom-sumo-sources.json
   # datadog:
