@@ -79,10 +79,13 @@ services:
   #   container_name: gateway_sumologic
   #   volumes:
   #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - ~/platform/custom-sumo-sources.json:/etc/custom-sumo-sources.json
   #   environment:
-  #     - SUMO_ACCESS_ID=[insert API key here]
+  #     - SUMO_ACCESS_ID=[insert API ID here]
   #     - SUMO_ACCESS_KEY=[insert API key here]
   #     - SUMO_COLLECTOR_NAME=[insert name here]
+  #     - SUMO_COLLECTOR_NAME_PREFIX=GCIS Data Gateway-
+  #     - SUMO_SOURCES_JSON=/etc/custom-sumo-sources.json
   # datadog:
   #   image: datadog/agent:7
   #   container_name: gateway_datadog
