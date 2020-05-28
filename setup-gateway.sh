@@ -133,8 +133,10 @@ init_config:
 instances:
  - name: Rackspace Data Gateway
    url: https://app:3000
-   disable_ssl_validation: true
+   tls_ignore_warning: true
    check_certificate_expiration: true
+   days_warning: 7
+   days_critical: 3
    timeout: 1
 EOL
 ) || die "Failed to generate http_check.yaml in platform directory for Datadog"
