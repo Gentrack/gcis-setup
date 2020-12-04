@@ -2,8 +2,8 @@ version: "3.1"
 
 services:
   app:
-    # Use region specific image tag: PROD-AU or PROD-UK
-    image: index.docker.io/gentrackio/gateway:PROD
+    # Use region specific image <tag>: PROD-AU or PROD-UK
+    image: index.docker.io/gentrackio/gateway:<tag>
     hostname: app1
     container_name: gateway_app
     volumes:
@@ -35,7 +35,8 @@ services:
       - vault
       - redis
   mq:
-    image: rabbitmq:3-management
+    # Use region specific image <tag>: PROD-AU or PROD-UK
+    image: index.docker.io/gentrackio/rabbitmq:<tag>
     hostname: rabbit1
     container_name: gateway_rabbitmq
     environment:
@@ -51,7 +52,8 @@ services:
     volumes:
       - RabbitMQData:/var/lib/rabbitmq/mnesia
   vault:
-    image: vault:0.8.0
+    # Use region specific image <tag>: PROD-AU or PROD-UK
+    image: index.docker.io/gentrackio/vault:<tag>
     container_name: gateway_vault
     expose:
       - 8200
@@ -61,7 +63,8 @@ services:
       - IPC_LOCK
     entrypoint: vault server -config=/data/config/
   redis:
-    image: redis:4-alpine
+    # Use region specific image <tag>: PROD-AU or PROD-UK
+    image: index.docker.io/gentrackio/redis:<tag>
     hostname: redis1
     container_name: gateway_redis
     expose:
